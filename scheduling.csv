@@ -1,0 +1,5 @@
+operacion,camion,bahia,inicio,fin,duracion
+C1_T1,C1,R,17.5,32.5,15.0
+C1_T2,C1,D,0.0,17.5,17.5
+C2_T1,C2,D,17.5,32.5,15.0
+C2_T2,C2,R,0.0,12.0,12.0

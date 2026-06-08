@@ -1,0 +1,5 @@
+operacion_i,operacion_j,precede
+C1_T2,C1_T1,si
+C1_T2,C2_T1,si
+C2_T2,C1_T1,si
+C2_T2,C2_T1,si

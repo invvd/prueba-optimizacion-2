@@ -1,0 +1,5 @@
+camion,estacion,llegada_min,llegada_hora,ventana_inicio,ventana_fin,cumple
+C1,3,480,08:00,480,840,1
+C2,1,600,10:00,360,600,1
+C2,2,420,07:00,420,720,1
+C2,4,370,06:10,360,660,1
