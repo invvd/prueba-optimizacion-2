@@ -1,0 +1,79 @@
+# Datos del modelo estocastico
+
+set NODOS := D 1 2 3 4;
+set ESTACIONES := 1 2 3 4;
+set CAMIONES := C1 C2;
+set COMPARTIMENTOS := T1 T2;
+set PRODUCTOS := R D;
+set ESCENARIOS := 1 2 3;
+
+param prob :=
+1 0.5
+2 0.3
+3 0.2;
+
+param demanda :=
+1 R 1 3000
+1 D 1 2000
+2 R 1 4000
+2 D 1 1500
+3 R 1 2500
+3 D 1 3000
+4 R 1 1000
+4 D 1 2500
+1 R 2 4500
+1 D 2 2800
+2 R 2 5500
+2 D 2 2000
+3 R 2 3500
+3 D 2 3000
+4 R 2 1000
+4 D 2 2500
+1 R 3 2000
+1 D 3 1200
+2 R 3 3000
+2 D 3 1000
+3 R 3 1800
+3 D 3 3000
+4 R 3 1000
+4 D 3 2500;
+
+param capacidad :=
+C1 T1 8000
+C1 T2 7000
+C2 T1 6000
+C2 T2 9000;
+
+param distancia :  D   1   2   3   4 :=
+             D    .  20  35  15  40
+             1   20   .  10  25  30
+             2   35  10   .  20  15
+             3   15  25  20   .  30
+             4   40  30  15  30   . ;
+
+param velocidad := 60;
+param t_servicio := 30;
+
+param ventana_inicio :=
+1 360
+2 420
+3 480
+4 360;
+
+param ventana_fin :=
+1 600
+2 720
+3 840
+4 660;
+
+param c_dist := 2;
+param c_short := 10;
+param c_fijo :=
+C1 500
+C2 400;
+
+param Delta := 0.30;
+
+param h_salida :=
+C1 300
+C2 330;

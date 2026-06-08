@@ -1,0 +1,21 @@
+# Datos del modelo de scheduling
+
+set OPERACIONES := C1_T1 C1_T2 C2_T1 C2_T2;
+
+param duracion :=
+C1_T1 15.0
+C1_T2 17.5
+C2_T1 15.0
+C2_T2 12.0;
+
+param camion :=
+C1_T1 C1
+C1_T2 C1
+C2_T1 C2
+C2_T2 C2;
+
+param bahia :=
+C1_T1 R
+C1_T2 D
+C2_T1 D
+C2_T2 R;

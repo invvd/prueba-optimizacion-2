@@ -1,0 +1,60 @@
+# Ejecuta el modelo determinista (Parte 1) y exporta resultados
+
+model modelo.mod;
+data datos.dat;
+
+solve;
+
+# --- Resultados de las rutas ---
+printf "camion,origen,destino,usado\n" > "rutas.csv";
+for {k in CAMIONES, i in NODOS, j in NODOS: x[k,i,j] > 0.5} {
+    printf "%s,%s,%s,%d\n", k, i, j, 1 >> "rutas.csv";
+}
+
+# --- Entregas por camion ---
+printf "camion,estacion,producto,litros\n" > "entregas.csv";
+for {k in CAMIONES, j in ESTACIONES, p in PRODUCTOS: w[k,j,p] > 0.01} {
+    printf "%s,%s,%s,%.2f\n", k, j, p, w[k,j,p] >> "entregas.csv";
+}
+
+# --- Shortage ---
+printf "estacion,producto,litros_faltantes\n" > "shortage.csv";
+for {j in ESTACIONES, p in PRODUCTOS: s[j,p] > 0.01} {
+    printf "%s,%s,%.2f\n", j, p, s[j,p] >> "shortage.csv";
+}
+
+# --- Estabilidad de carga (fill ratios en cada tramo activo) ---
+printf "camion,tramo_i,tramo_j,fill_T1,fill_T2,diferencia,cumple\n" > "estabilidad.csv";
+for {k in CAMIONES, i in NODOS, j in NODOS: x[k,i,j] > 0.5} {
+    printf "%s,%s,%s,%.4f,%.4f,%.4f,%d\n", k, i, j,
+        f[k,'T1',i,j]/capacidad[k,'T1'],
+        f[k,'T2',i,j]/capacidad[k,'T2'],
+        abs(f[k,'T1',i,j]/capacidad[k,'T1'] - f[k,'T2',i,j]/capacidad[k,'T2']),
+        if abs(f[k,'T1',i,j]/capacidad[k,'T1'] - f[k,'T2',i,j]/capacidad[k,'T2']) <= Delta then 1 else 0
+        >> "estabilidad.csv";
+}
+
+# --- Tiempos de llegada ---
+printf "camion,estacion,llegada_min,llegada_hora,ventana_inicio,ventana_fin,cumple\n" > "tiempos.csv";
+for {k in CAMIONES, j in ESTACIONES: sum{i in NODOS} x[k,i,j] > 0.5} {
+    printf "%s,%s,%d,%02d:%02d,%d,%d,%d\n", k, j, t[k,j],
+        floor(t[k,j]/60), t[k,j] mod 60,
+        ventana_inicio[j], ventana_fin[j],
+        if ventana_inicio[j] <= t[k,j] and t[k,j] <= ventana_fin[j] then 1 else 0
+        >> "tiempos.csv";
+}
+
+# --- Desglose de costos ---
+printf "componente,valor\n" > "costo.csv";
+printf "distancia,%.2f\n", c_dist * sum{k in CAMIONES, i in NODOS, j in NODOS} distancia[i,j] * x[k,i,j] >> "costo.csv";
+printf "fijo,%.2f\n", sum{k in CAMIONES} c_fijo[k] * u[k] >> "costo.csv";
+printf "shortage,%.2f\n", c_short * sum{j in ESTACIONES, p in PRODUCTOS} s[j,p] >> "costo.csv";
+printf "total,%.2f\n", Costo_Total >> "costo.csv";
+
+# --- Asignacion tanque-producto ---
+printf "camion,tanque,producto\n" > "asignacion.csv";
+for {k in CAMIONES, t in COMPARTIMENTOS, p in PRODUCTOS: y[k,t,p] > 0.5} {
+    printf "%s,%s,%s\n", k, t, p >> "asignacion.csv";
+}
+
+printf "\nArchivos CSV generados.\n";

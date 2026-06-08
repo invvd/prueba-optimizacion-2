@@ -1,0 +1,43 @@
+# Ejecuta el modelo estocastico (Parte 4) y exporta resultados
+
+model estocastico.mod;
+data estocastico.dat;
+
+solve;
+
+# --- Decisiones de primera etapa ---
+printf "camion,origen,destino,usado\n" > "estocastico_rutas.csv";
+for {k in CAMIONES, i in NODOS, j in NODOS: x[k,i,j] > 0.5} {
+    printf "%s,%s,%s,%d\n", k, i, j, 1 >> "estocastico_rutas.csv";
+}
+
+printf "camion,tanque,producto\n" > "estocastico_asignacion.csv";
+for {k in CAMIONES, t in COMPARTIMENTOS, p in PRODUCTOS: y[k,t,p] > 0.5} {
+    printf "%s,%s,%s\n", k, t, p >> "estocastico_asignacion.csv";
+}
+
+printf "camion,tanque,carga_inicial_litros\n" > "estocastico_carga.csv";
+for {k in CAMIONES, t in COMPARTIMENTOS: L[k,t] > 0.01} {
+    printf "%s,%s,%.2f\n", k, t, L[k,t] >> "estocastico_carga.csv";
+}
+
+# --- Resultados por escenario (segunda etapa) ---
+printf "escenario,estacion,producto,demanda,entregado,shortage\n" > "estocastico_escenarios.csv";
+for {esc in ESCENARIOS, j in ESTACIONES, p in PRODUCTOS} {
+    printf "%d,%s,%s,%.2f,%.2f,%.2f\n", esc, j, p,
+        demanda[j,p,esc],
+        sum{k in CAMIONES} w[k,j,p,esc],
+        s[j,p,esc] >> "estocastico_escenarios.csv";
+}
+
+# --- Costos ---
+printf "componente,valor\n" > "estocastico_costo.csv";
+printf "distancia,%.2f\n", c_dist * sum{k in CAMIONES, i in NODOS, j in NODOS} distancia[i,j] * x[k,i,j] >> "estocastico_costo.csv";
+printf "fijo,%.2f\n", sum{k in CAMIONES} c_fijo[k] * u[k] >> "estocastico_costo.csv";
+for {esc in ESCENARIOS} {
+    printf "shortage_esc%d,%.2f\n", esc, c_short * sum{j in ESTACIONES, p in PRODUCTOS} s[j,p,esc] >> "estocastico_costo.csv";
+}
+printf "shortage_esperado,%.2f\n", c_short * sum{esc in ESCENARIOS} prob[esc] * sum{j in ESTACIONES, p in PRODUCTOS} s[j,p,esc] >> "estocastico_costo.csv";
+printf "total,%.2f\n", Costo_Total_Estocastico >> "estocastico_costo.csv";
+
+printf "\nArchivos CSV generados.\n";

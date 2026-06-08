@@ -1,0 +1,22 @@
+# Ejecuta el scheduling (Parte 2) y exporta resultados
+
+model scheduling.mod;
+data scheduling.dat;
+
+solve;
+
+# --- Secuencia de operaciones ---
+printf "operacion,camion,bahia,inicio,fin,duracion\n" > "scheduling.csv";
+for {i in OPERACIONES} {
+    printf "%s,%s,%s,%.2f,%.2f,%.2f\n", i, camion[i], bahia[i],
+        inicio[i], inicio[i] + duracion[i], duracion[i] >> "scheduling.csv";
+}
+
+# --- Orden entre operaciones en conflicto ---
+printf "operacion_i,operacion_j,precede\n" > "orden_scheduling.csv";
+for {(i,j) in PARES: y[i,j] > 0.5} {
+    printf "%s,%s,si\n", i, j >> "orden_scheduling.csv";
+}
+
+printf "\nMakespan: %.2f minutos\n", Cmax;
+printf "Archivos CSV generados.\n";
